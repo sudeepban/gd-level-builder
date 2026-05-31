@@ -176,7 +176,8 @@ def color_trigger(gx, channel, r, g_, b, duration=0.0, blending=False):
     """
     Place a color trigger at grid x=gx targeting color channel.
 
-    channel: 1, 2, 3, 4, or 1000 (background)
+    channel: 1004 (all objects/blocks), 1001 (ground texture), 1000 (background)
+    Channels 1–999 are user-defined and unassigned by default — do not use.
     duration: seconds for transition (0 = instant snap)
     blending: True for glow/blending channels
     """

@@ -138,13 +138,23 @@ Place a color trigger at the x position where you want the shift to begin. Use `
 
 ```python
 # Smooth 1-second shift to danger red at x=109
-color_trigger(109, 1,    r=180, g=0,  b=80,  duration=1.0, blending=True)
-color_trigger(109, 2,    r=255, g=50, b=50,  duration=1.0, blending=True)
-color_trigger(109, 1000, r=25,  g=3,  b=10,  duration=0.8)
+# Channel 1004 = objects/blocks, 1001 = ground texture, 1000 = background
+# Do NOT use channels 1–999: blocks don't use those by default.
+color_trigger(109, 1004, r=180, g_=0,  b=80,  duration=1.0, blending=True)
+color_trigger(109, 1001, r=140, g_=0,  b=60,  duration=1.0)
+color_trigger(109, 1000, r=25,  g_=3,  b=10,  duration=0.8)
 ```
 
 ### Recommended color journey pattern
 Match color shifts to section transitions — the visual change signals the gameplay change to the player:
+
+**Correct channel IDs (confirmed):**
+| Channel | What it controls |
+|---|---|
+| 1004 | All objects/blocks (default for ID 1, 8, 21, etc.) |
+| 1001 | Ground texture color |
+| 1000 | Background color |
+| 1–999 | User-defined — NOT assigned to objects by default, do not use |
 
 | Section | Mood | Color suggestion |
 |---|---|---|
