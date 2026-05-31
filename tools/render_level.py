@@ -156,7 +156,11 @@ def render(gmd_path: str, output_path: str):
 
         # Determine block color: per-block channel assignment takes priority,
         # then fall back to zone-trigger interpolation, then default gray.
-        per_block_ch = obj.get(obj_prop.COLOR_1)
+        # ID=207 (solid box): fill is COLOR_2; others: fill is COLOR_1.
+        if oid == 207:
+            per_block_ch = obj.get(obj_prop.COLOR_2)
+        else:
+            per_block_ch = obj.get(obj_prop.COLOR_1)
         if per_block_ch and per_block_ch in channel_colors:
             rgb = channel_colors[per_block_ch]
             block_color = "#{:02x}{:02x}{:02x}".format(
@@ -169,8 +173,8 @@ def render(gmd_path: str, output_path: str):
                 int(zone_rgb[2] * 180 + 20),
             )
 
-        if oid == 1:    draw_block(ax, gx, gy, color=block_color)
-        elif oid == 3:  draw_block(ax, gx, gy, color="#4a4a4a")
+        if oid in (1, 207): draw_block(ax, gx, gy, color=block_color)
+        elif oid == 3:      draw_block(ax, gx, gy, color="#4a4a4a")
         elif oid == 8:  draw_spike(ax, gx, gy, rot=rot)
         elif oid == 21: draw_sawblade(ax, gx, gy)
         elif oid == 36: draw_orb(ax, gx, gy, "#ffe000")

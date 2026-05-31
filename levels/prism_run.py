@@ -98,7 +98,8 @@ coin(103, G + 2)         # second coin reward
 # Each block gets its own intrinsic color — a smooth gradient from red to violet
 # spanning the full level width. No triggers needed.
 # ──────────────────────────────────────────────────────────────────────────────
-color_blocks_rainbow(width=107, saturation=1.0, value=0.92, hue_range=285)
+color_blocks_rainbow(width=107, saturation=1.0, value=0.92, hue_range=285,
+                     solid_box=True, border_hue_offset=180)
 
 # ──────────────────────────────────────────────────────────────────────────────
 # VALIDATE & EXPORT

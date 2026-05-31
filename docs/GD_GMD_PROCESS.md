@@ -74,6 +74,7 @@ o[obj_prop.ROTATION] = 180.0
 | Pink Pad | 140 |
 | Pink Orb | 141 |
 | Coin | 142 |
+| Solid Fill Box | 207 |
 | Color Trigger | 899 |
 | Pulse/Glow Light (decoration) | 1006 |
 
@@ -185,6 +186,25 @@ Every object uses a **color channel** — an integer that maps to an RGB value. 
 | 1001 | Ground texture |
 | 1000 | Background |
 | 1–999 | User-defined — assign explicitly to individual objects |
+
+### ID 207 — Solid Fill Box (confirmed ✓)
+A solid block with independent fill and border colors. Player can jump on it (full collision). Unlike the standard block (ID=1), which only exposes the border via colors, ID=207 shows a true solid fill.
+
+```python
+# Fill = COLOR_2 (key 22) + COLOR_1_INDEX (key 155)
+# Border = COLOR_1 (key 21) + COLOR_2_INDEX (key 156)
+# All four properties must be set together or colors won't apply.
+obj[obj_prop.COLOR_2]       = fill_channel
+obj[obj_prop.COLOR_1_INDEX] = fill_channel
+obj[obj_prop.COLOR_1]       = border_channel
+obj[obj_prop.COLOR_2_INDEX] = border_channel
+```
+
+`COLOR_2_DEFAULT[207] = 1` — fill defaults to user channel 1. `COLOR_1_DEFAULT[207] = 1004` — border defaults to the OBJECT channel.
+
+Use `gd_lib.color_blocks_rainbow(solid_box=True)` to automatically convert blocks to ID=207 with per-block fill and border colors.
+
+---
 
 ### Per-block static colors
 Assign an object to a unique channel via `obj_prop.COLOR_1` (key 21), then define that channel's RGB in the level's `kS38` color list:

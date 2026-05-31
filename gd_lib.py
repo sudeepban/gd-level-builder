@@ -27,6 +27,7 @@ X_OFFSET = 195  # GD internal x origin offset
 
 # Object IDs
 ID_BLOCK       = 1
+ID_SOLID_BOX   = 207   # solid fill+border box, fill=COLOR_2, border=COLOR_1
 ID_THIN_PLAT   = 3
 ID_SPIKE       = 8
 ID_SAWBLADE    = 21
@@ -225,25 +226,47 @@ def block_color(gx, gy, r, g, b):
     raise ValueError(f"No block found at grid ({gx}, {gy})")
 
 
-def color_blocks_rainbow(width, saturation=1.0, value=0.9, hue_range=280):
+def color_blocks_rainbow(width, saturation=1.0, value=0.9, hue_range=280,
+                         solid_box=False, border_hue_offset=180):
     """
-    Color every block in the current object list with a smooth rainbow
-    gradient running left to right across `width` grid units.
+    Color every block with a smooth rainbow gradient left to right.
 
-    hue_range: degrees of the color wheel to span (280 = red→violet,
-                360 = full loop back to red).
+    solid_box: if True, converts blocks to ID_SOLID_BOX (207) which
+               supports independent fill and border colors.
+    border_hue_offset: degrees to shift the border hue from the fill hue.
+                       180 = complementary color, 0 = same as fill.
+    hue_range: degrees of the color wheel to span (280 = red to violet).
+
+    For ID_SOLID_BOX (207):
+        fill   -> COLOR_2 (key 22) + COLOR_1_INDEX (key 155)
+        border -> COLOR_1 (key 21) + COLOR_2_INDEX (key 156)
+    For standard ID_BLOCK (1):
+        color  -> COLOR_1 (key 21) only
     """
     for obj in _objects:
-        if obj[obj_prop.ID] != ID_BLOCK:
+        if obj[obj_prop.ID] not in (ID_BLOCK, ID_SOLID_BOX):
             continue
         gx = (obj[obj_prop.X] - X_OFFSET) / BLOCK
         t = max(0.0, min(1.0, gx / width))
-        hue = t * hue_range / 360.0
-        r, g, b = colorsys.hsv_to_rgb(hue, saturation, value)
-        channel = _next_channel[0]
-        obj[obj_prop.COLOR_1] = channel
-        _block_colors[channel] = (int(r * 255), int(g * 255), int(b * 255))
+        fill_hue = t * hue_range / 360.0
+        r, g, b = colorsys.hsv_to_rgb(fill_hue, saturation, value)
+        fill_ch = _next_channel[0]
+        _block_colors[fill_ch] = (int(r * 255), int(g * 255), int(b * 255))
         _next_channel[0] += 1
+
+        if solid_box:
+            obj[obj_prop.ID] = ID_SOLID_BOX
+            bdr_hue = (fill_hue + border_hue_offset / 360.0) % 1.0
+            br, bg, bb = colorsys.hsv_to_rgb(bdr_hue, saturation, value)
+            bdr_ch = _next_channel[0]
+            _block_colors[bdr_ch] = (int(br * 255), int(bg * 255), int(bb * 255))
+            _next_channel[0] += 1
+            obj[obj_prop.COLOR_2]       = fill_ch
+            obj[obj_prop.COLOR_1_INDEX] = fill_ch
+            obj[obj_prop.COLOR_1]       = bdr_ch
+            obj[obj_prop.COLOR_2_INDEX] = bdr_ch
+        else:
+            obj[obj_prop.COLOR_1] = fill_ch
 
 
 # ---------------------------------------------------------------------------
