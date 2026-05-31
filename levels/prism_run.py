@@ -1,6 +1,7 @@
 """
 Prism Run — Rainbow-spectrum Normal-difficulty level.
-The world shifts through every color of the rainbow as you run.
+Every block has its own intrinsic color forming a continuous rainbow gradient
+from red (start) to violet (end) — no color triggers needed.
 Each section introduces a new mechanic before testing it.
 Song: Jumper (official song 6)
 """
@@ -93,58 +94,11 @@ coin(100, G + 2)         # coin — grab with a normal jump
 coin(103, G + 2)         # second coin reward
 
 # ──────────────────────────────────────────────────────────────────────────────
-# RAINBOW COLOR JOURNEY
-# Triggers fire 2–4 blocks before each section so the shift is visually
-# "arriving" as the player enters new territory.
-# Channel 1004 = objects/blocks, Channel 1001 = ground, Channel 1000 = background
+# RAINBOW BLOCK COLORS
+# Each block gets its own intrinsic color — a smooth gradient from red to violet
+# spanning the full level width. No triggers needed.
 # ──────────────────────────────────────────────────────────────────────────────
-
-# RED — instant at level start (fires before player position = 0)
-color_trigger(-2, 1004, r=230, g_=40,  b=40,  duration=0.0, blending=True)
-color_trigger(-2, 1001, r=180, g_=20,  b=20,  duration=0.0)
-color_trigger(-2, 1000, r=25,  g_=3,   b=3,   duration=0.0)
-
-# ORANGE — fade in before section 2
-color_trigger(12, 1004, r=230, g_=120, b=10,  duration=1.0, blending=True)
-color_trigger(12, 1001, r=180, g_=80,  b=5,   duration=1.0)
-color_trigger(12, 1000, r=28,  g_=12,  b=2,   duration=1.0)
-
-# YELLOW — bright and warm, before section 3
-color_trigger(27, 1004, r=240, g_=220, b=20,  duration=1.0, blending=True)
-color_trigger(27, 1001, r=190, g_=170, b=10,  duration=1.0)
-color_trigger(27, 1000, r=22,  g_=20,  b=4,   duration=1.0)
-
-# GREEN — before section 4
-color_trigger(42, 1004, r=40,  g_=210, b=70,  duration=1.0, blending=True)
-color_trigger(42, 1001, r=20,  g_=160, b=40,  duration=1.0)
-color_trigger(42, 1000, r=4,   g_=20,  b=9,   duration=1.0)
-
-# CYAN — before section 5
-color_trigger(56, 1004, r=20,  g_=210, b=220, duration=1.0, blending=True)
-color_trigger(56, 1001, r=10,  g_=160, b=170, duration=1.0)
-color_trigger(56, 1000, r=4,   g_=22,  b=24,  duration=1.0)
-
-# INDIGO — deeper blue, intensity building before section 6
-color_trigger(69, 1004, r=60,  g_=80,  b=240, duration=1.0, blending=True)
-color_trigger(69, 1001, r=30,  g_=40,  b=190, duration=1.0)
-color_trigger(69, 1000, r=4,   g_=6,   b=28,  duration=1.0)
-
-# VIOLET — rich purple before climax section 7
-color_trigger(83, 1004, r=180, g_=30,  b=235, duration=1.0, blending=True)
-color_trigger(83, 1001, r=130, g_=15,  b=180, duration=1.0)
-color_trigger(83, 1000, r=18,  g_=3,   b=28,  duration=1.0)
-
-# WHITE FINALE — bright and triumphant before outro
-color_trigger(94, 1004, r=245, g_=245, b=255, duration=1.5, blending=True)
-color_trigger(94, 1001, r=200, g_=200, b=230, duration=1.5)
-color_trigger(94, 1000, r=12,  g_=8,   b=22,  duration=1.5)
-
-# ──────────────────────────────────────────────────────────────────────────────
-# GLOW LIGHTS — atmospheric (placed at y=255, well above level, invisible)
-# ──────────────────────────────────────────────────────────────────────────────
-glow_light(-1, r=200, g_=50,  b=50)    # warm red glow at the start
-glow_light(44, r=50,  g_=200, b=80)    # cool green glow mid-level
-glow_light(96, r=180, g_=100, b=235)   # violet-white glow at the finale
+color_blocks_rainbow(width=107, saturation=1.0, value=0.92, hue_range=285)
 
 # ──────────────────────────────────────────────────────────────────────────────
 # VALIDATE & EXPORT

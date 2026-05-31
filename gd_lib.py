@@ -9,9 +9,12 @@ Usage in a level script:
     lvl.to_file("output/MyLevel.gmd")
 """
 
+import colorsys
+
 from gmdkit import Level, Object
 from gmdkit.mappings import obj_prop, lvl_prop
 from gmdkit.mappings.obj_prop import trigger as trig_prop
+from gmdkit.models.prop.color import Color
 
 # ---------------------------------------------------------------------------
 # Constants
@@ -40,11 +43,15 @@ ID_GLOW_LIGHT  = 1006
 # ---------------------------------------------------------------------------
 
 _objects: list = []
+_block_colors: dict = {}   # channel_id -> (r, g, b)
+_next_channel: list = [1]  # mutable counter for unique per-block channels
 
 
 def reset():
-    """Clear the object list — call at the top of each level script."""
+    """Clear all state — call at the top of each level script."""
     _objects.clear()
+    _block_colors.clear()
+    _next_channel[0] = 1
 
 
 # ---------------------------------------------------------------------------
@@ -198,6 +205,48 @@ def color_trigger(gx, channel, r, g_, b, duration=0.0, blending=False):
 
 
 # ---------------------------------------------------------------------------
+# Per-block colors
+# ---------------------------------------------------------------------------
+
+def block_color(gx, gy, r, g, b):
+    """
+    Assign a specific RGB color to the block at grid position (gx, gy).
+    The block must already exist (call after ground/raised/platform).
+    """
+    x = float(gx * BLOCK + X_OFFSET)
+    y = float(gy * BLOCK + GROUND_Y_GD)
+    for obj in _objects:
+        if obj[obj_prop.ID] == ID_BLOCK and obj[obj_prop.X] == x and obj[obj_prop.Y] == y:
+            channel = _next_channel[0]
+            obj[obj_prop.COLOR_1] = channel
+            _block_colors[channel] = (int(r), int(g), int(b))
+            _next_channel[0] += 1
+            return
+    raise ValueError(f"No block found at grid ({gx}, {gy})")
+
+
+def color_blocks_rainbow(width, saturation=1.0, value=0.9, hue_range=280):
+    """
+    Color every block in the current object list with a smooth rainbow
+    gradient running left to right across `width` grid units.
+
+    hue_range: degrees of the color wheel to span (280 = red→violet,
+                360 = full loop back to red).
+    """
+    for obj in _objects:
+        if obj[obj_prop.ID] != ID_BLOCK:
+            continue
+        gx = (obj[obj_prop.X] - X_OFFSET) / BLOCK
+        t = max(0.0, min(1.0, gx / width))
+        hue = t * hue_range / 360.0
+        r, g, b = colorsys.hsv_to_rgb(hue, saturation, value)
+        channel = _next_channel[0]
+        obj[obj_prop.COLOR_1] = channel
+        _block_colors[channel] = (int(r * 255), int(g * 255), int(b * 255))
+        _next_channel[0] += 1
+
+
+# ---------------------------------------------------------------------------
 # Build & export
 # ---------------------------------------------------------------------------
 
@@ -215,6 +264,17 @@ def build(name, song_id=1, description="", version=1) -> Level:
     lvl.objects.clear()
     for o in _objects:
         lvl.objects.append(o)
+
+    # Write per-block colors into the level's color list
+    if _block_colors:
+        for channel, (r, g, b) in _block_colors.items():
+            c = Color.default(channel)
+            c.red = r
+            c.green = g
+            c.blue = b
+            c.opacity = 1.0
+            lvl.start['kS38'].append(c)
+
     return lvl
 
 
