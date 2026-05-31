@@ -174,6 +174,45 @@ lvl.to_file("MyLevel.gmd")
 
 ---
 
+## Object Colors
+
+Every object uses a **color channel** — an integer that maps to an RGB value. The default for blocks (ID 1), spikes (8), sawblades (21), etc. is channel **1004** (OBJECT). Color triggers and per-block assignments both work by changing what a channel's RGB is.
+
+### Key channels
+| Channel | Controls |
+|---|---|
+| 1004 | All objects (default) |
+| 1001 | Ground texture |
+| 1000 | Background |
+| 1–999 | User-defined — assign explicitly to individual objects |
+
+### Per-block static colors
+Assign an object to a unique channel via `obj_prop.COLOR_1` (key 21), then define that channel's RGB in the level's `kS38` color list:
+
+```python
+from gmdkit.models.prop.color import Color
+
+# Assign block to channel 7, make it red
+block[obj_prop.COLOR_1] = 7
+
+c = Color.default(7)
+c.red = 255; c.green = 0; c.blue = 0; c.opacity = 1.0
+lvl.start['kS38'].append(c)
+```
+
+Channels 1–999 each hold one RGB; you can give every block in a level its own color this way. `gd_lib.block_color()` and `color_blocks_rainbow()` handle this automatically.
+
+### Dynamic color triggers (runtime shifts)
+Color trigger objects (ID 899) change a channel's RGB when the player reaches their x position. Target channel 1004 to shift all blocks at once, 1001 for ground, 1000 for background. See GD_DESIGN_NOTES.md for placement details.
+
+### Common mistakes
+| Mistake | Fix |
+|---|---|
+| Color trigger has no visible effect | Wrong channel — use 1004 for blocks, not 1 or 2 |
+| Per-block color not showing | Must append a `Color` to `lvl.start['kS38']` AND set `COLOR_1` on the object |
+
+---
+
 ## Importing via GDShare
 
 1. Install **Geode** mod loader for Geometry Dash
@@ -183,6 +222,31 @@ lvl.to_file("MyLevel.gmd")
 5. Level appears ready to play or edit
 
 **Note:** `.gmd` is the original GDShare text-based plist format. `.gmd2` is the newer binary ZIP format. Both are supported by current GDShare — always output `.gmd` for maximum compatibility.
+
+---
+
+## Visualizer
+
+`tools/render_level.py` renders any `.gmd` file as a 2D side-view PNG.
+
+```bash
+python tools/render_level.py output/MyLevel.gmd
+# → saves output/MyLevel.png
+```
+
+Output is placed in the same folder with the same name, `.png` extension. What it renders:
+
+| Object | Appearance |
+|---|---|
+| Blocks | Colored by per-block channel (if set) or zone-trigger interpolation |
+| Spikes | Red triangles |
+| Sawblades | Orange 8-tooth star |
+| Yellow orb/pad | Yellow circle / pill |
+| Pink orb/pad | Pink circle / pill |
+| Coins | Gold circle |
+| Color triggers, glow lights | Not rendered (invisible in-game too) |
+
+Block coloring priority: per-block `COLOR_1` channel from `kS38` → zone-trigger interpolation from channel 1000 background triggers → default gray.
 
 ---
 

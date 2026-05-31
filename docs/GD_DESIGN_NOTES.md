@@ -138,8 +138,7 @@ Place a color trigger at the x position where you want the shift to begin. Use `
 
 ```python
 # Smooth 1-second shift to danger red at x=109
-# Channel 1004 = objects/blocks, 1001 = ground texture, 1000 = background
-# Do NOT use channels 1–999: blocks don't use those by default.
+# Trigger channel 1004 (all blocks), 1001 (ground), 1000 (background)
 color_trigger(109, 1004, r=180, g_=0,  b=80,  duration=1.0, blending=True)
 color_trigger(109, 1001, r=140, g_=0,  b=60,  duration=1.0)
 color_trigger(109, 1000, r=25,  g_=3,  b=10,  duration=0.8)
@@ -154,7 +153,7 @@ Match color shifts to section transitions — the visual change signals the game
 | 1004 | All objects/blocks (default for ID 1, 8, 21, etc.) |
 | 1001 | Ground texture color |
 | 1000 | Background color |
-| 1–999 | User-defined — NOT assigned to objects by default, do not use |
+| 1–999 | User-defined — not assigned to objects by default, but used explicitly for per-block static colors (see below) |
 
 | Section | Mood | Color suggestion |
 |---|---|---|
@@ -164,6 +163,15 @@ Match color shifts to section transitions — the visual change signals the game
 | Second drop | Danger | Hot pink/red, red spikes |
 | Climax | Peak danger | Deep red, orange spikes |
 | Outro | Resolution | Return to intro colors |
+
+### Two color approaches
+
+| Approach | How | When to use |
+|---|---|---|
+| **Per-block static** | Assign each block to a unique channel (1–999) via `COLOR_1`; set that channel's RGB in `lvl.start['kS38']` | Permanent gradients, rainbow effects — color is baked in, no triggers needed |
+| **Trigger-based dynamic** | `color_trigger()` targeting channel 1004/1001/1000 | Color shifts mid-level that respond to player position |
+
+The two can be combined: assign blocks to unique channels for a starting gradient, then fire triggers against channel 1004 to shift everything together at key moments. In practice, use `gd_lib.block_color()` or `color_blocks_rainbow()` for static colors and `color_trigger()` for runtime shifts.
 
 ### Tips
 - **Transition duration 0.8–1.5s** for section shifts — smooth but noticeable
